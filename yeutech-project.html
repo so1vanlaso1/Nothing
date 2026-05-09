@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Technical Deep Dive: YeuTech Marketing Platform full-stack project.">
+    <title>YeuTech Marketing Platform | Technical Architecture & Deep Dive</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&family=Fira+Code:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --accent-secondary: #8b5cf6;
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --code-bg: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            background-attachment: fixed;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px; /* narrowed for readability */
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        header {
+            text-align: left;
+            margin-bottom: 4rem;
+            animation: fadeInDown 1s ease-out;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 3rem;
+        }
+
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-radius: 9999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin: 0 0 1.5rem 0;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #60a5fa, #c084fc, #60a5fa);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 5s linear infinite;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .tech-tag {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Article Sections */
+        .article-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-section:nth-child(2) { animation-delay: 0.1s; }
+        .article-section:nth-child(3) { animation-delay: 0.2s; }
+        .article-section:nth-child(4) { animation-delay: 0.3s; }
+        .article-section:nth-child(5) { animation-delay: 0.4s; }
+        .article-section:nth-child(6) { animation-delay: 0.5s; }
+
+        .article-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-secondary));
+            opacity: 0.5;
+        }
+
+        .article-section h2 {
+            font-size: 2rem;
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .article-section h3 {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .article-section p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .article-section ul {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .article-section li {
+            margin-bottom: 0.8rem;
+        }
+
+        .highlight {
+            color: #93c5fd;
+            font-weight: 500;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border: 1px dashed var(--card-border);
+        }
+
+        .layer {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .layer-web { background: rgba(59, 130, 246, 0.1); color: #93c5fd; }
+        .layer-app { background: rgba(139, 92, 246, 0.1); color: #c4b5fd; }
+        .layer-domain { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 2px solid rgba(16, 185, 129, 0.3); }
+        .layer-infra { background: rgba(245, 158, 11, 0.1); color: #fcd34d; }
+
+        .arch-arrows {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #e2e8f0;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="date-badge">Mar 2026 – Present</div>
+            <h1>YeuTech Marketing Platform</h1>
+            <p class="subtitle">A comprehensive technical deep dive into the architecture, security flows, and infrastructure of the YeuTech full-stack marketing solution.</p>
+            
+            <div class="tech-stack">
+                <span class="tech-tag">Java 21</span>
+                <span class="tech-tag">Spring Boot 3.x</span>
+                <span class="tech-tag">Spring Security</span>
+                <span class="tech-tag">JWT</span>
+                <span class="tech-tag">MySQL</span>
+                <span class="tech-tag">Flyway</span>
+                <span class="tech-tag">React 18</span>
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">Docker</span>
+            </div>
+        </header>
+
+        <!-- Section 1: Architecture -->
+        <section class="article-section">
+            <h2>🏗️ Clean Architecture & Domain-Driven Design</h2>
+            <p>To ensure the application remains maintainable and scalable as business logic grows, the backend was strictly engineered using <span class="highlight">Clean Architecture</span> and <span class="highlight">Domain-Driven Design (DDD)</span> patterns. This decouples the core business rules from frameworks and databases.</p>
+            
+            <div class="arch-diagram">
+                <div class="layer layer-web">Presentation / Web Layer (Controllers, DTOs, Security Filters)</div>
+                <div class="arch-arrows">↓ ↑</div>
+                <div class="layer layer-app">Application Layer (Use Cases, Application Services, Interfaces)</div>
+                <div class="arch-arrows">↓ ↑</div>
+                <div class="layer layer-domain">Domain Layer (Entities, Value Objects, Domain Events, Domain Rules)</div>
+                <div class="arch-arrows">↑ ↓</div>
+                <div class="layer layer-infra">Infrastructure Layer (MySQL, JPA, Redis, SMTP, External APIs)</div>
+            </div>
+
+            <h3>Core Architectural Decisions</h3>
+            <ul>
+                <li><strong>Dependency Rule:</strong> Source code dependencies only point inwards. The core Domain Layer has zero dependencies on Spring Boot or MySQL, making it purely testable with standard Java unit tests.</li>
+                <li><strong>Bounded Contexts:</strong> The application is split into logical modules (e.g., <code>IdentityAccess</code>, <code>MarketingCampaigns</code>, <code>Billing</code>) to prevent monolithic entanglement.</li>
+                <li><strong>Ports and Adapters:</strong> The Application layer defines interfaces (Ports) such as <code>UserRepository</code>. The Infrastructure layer implements these (Adapters) using Spring Data JPA, allowing us to swap databases without touching business logic.</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Advanced Spring Security Architecture -->
+        <section class="article-section">
+            <h2>🛡️ Advanced Spring Security Architecture</h2>
+            <p>The platform implements a highly customized, stateless security architecture leveraging <span class="highlight">Spring Security 6.x</span> (Spring Boot 3) to protect all API endpoints and manage user identity securely.</p>
+
+            <h3>1. Bean-Based Security Filter Chain</h3>
+            <p>Moving away from deprecated configuration adapters, the security rules are defined via a modernized <code>SecurityFilterChain</code> bean. This explicitly disables CSRF (as we use stateless JWTs) while strictly configuring CORS to only accept requests from allowed React frontend origins. It defines public ingress routes (e.g., <code>/api/v1/auth/**</code>) and secures all others by default.</p>
+
+            <h3>2. JWT Authentication Filter</h3>
+            <p>A custom <code>JwtAuthenticationFilter</code> (extending <code>OncePerRequestFilter</code>) intercepts every incoming HTTP request. It extracts the JWT from the <code>Authorization: Bearer</code> header, verifies the RSA cryptographic signature (preventing tampering), and checks expiration. If valid, it constructs a <code>UsernamePasswordAuthenticationToken</code> and securely injects it into the <code>SecurityContextHolder</code> for the request lifecycle.</p>
+
+            <h3>3. UserDetailsService & BCrypt</h3>
+            <p>Authentication relies on a custom <code>UserDetailsService</code> that queries the MySQL database. Passwords are never stored or compared in plain text. Instead, we use the robust <code>BCryptPasswordEncoder</code> with a high work-factor algorithm, effectively mitigating brute-force and rainbow table attacks.</p>
+
+            <h3>4. Security Exception Handling</h3>
+            <p>To ensure the React frontend always receives predictable JSON responses rather than standard Spring HTML error pages, we implemented custom <code>AuthenticationEntryPoint</code> (for 401 Unauthorized errors) and <code>AccessDeniedHandler</code> (for 403 Forbidden errors). These handlers seamlessly integrate with our global RFC 7807 <code>ProblemDetail</code> JSON structure.</p>
+
+            <h3>5. Email Verification & OTP Recovery</h3>
+            <ul>
+                <li><strong>Registration Flow:</strong> Users are created with a <code>PENDING</code> state. The system publishes a <code>UserRegisteredEvent</code>, asynchronously generating a secure, time-limited cryptographic token emailed to the user for activation.</li>
+                <li><strong>OTP-Based Password Recovery:</strong> Instead of generic reset links, a secure 6-digit One-Time Password (OTP) is generated using <code>SecureRandom</code>, hashed, and stored in the database with a strict 10-minute Time-To-Live (TTL).</li>
+            </ul>
+        </section>
+
+        <!-- Section 3: RESTful API & RBAC -->
+        <section class="article-section">
+            <h2>⚡ RESTful API Ecosystem & Role-Based Access Control</h2>
+            <p>The backend exposes <span class="highlight">20+ robust RESTful endpoints</span> with deep Spring Security integration for fine-grained authorization.</p>
+
+            <h3>API Design & Exception Handling</h3>
+            <ul>
+                <li><strong>Standardization:</strong> Adheres to Level 2 of the Richardson Maturity Model, using resource-based URLs.</li>
+                <li><strong>Global Exceptions:</strong> Uses Spring's <code>@RestControllerAdvice</code> to intercept exceptions globally.</li>
+                <li><strong>Pagination & Sorting:</strong> All collection-returning endpoints implement Spring Data's <code>Pageable</code>.</li>
+            </ul>
+
+            <h3>Method-Level Security (RBAC)</h3>
+            <p>Security goes beyond basic URL matching. By enabling <code>@EnableMethodSecurity</code>, we implemented fine-grained, method-level authorization directly on our service and controller layers.</p>
+            <ul>
+                <li><strong>Role Verification:</strong> Endpoints are guarded with annotations like <code>@PreAuthorize("hasRole('ADMIN')")</code>. Roles (e.g., <code>ROLE_USER</code>, <code>ROLE_MANAGER</code>) are extracted directly from the verified JWT claims so the database doesn't need to be queried on every request.</li>
+                <li><strong>Custom Permission Evaluators:</strong> For complex business rules, we use SpEL (Spring Expression Language) to enforce ownership. For example, <code>@PreAuthorize("@securityService.isOwner(authentication, #userId)")</code> ensures a user can only modify their own profile data unless they possess superior admin privileges.</li>
+            </ul>
+        </section>
+
+        <!-- Section 4: Data Management -->
+        <section class="article-section">
+            <h2>🗄️ Database Schema Evolution & Persistence</h2>
+            <p>Data integrity is paramount. We selected <span class="highlight">MySQL</span> for its robust relational guarantees, and <span class="highlight">Flyway</span> to manage the schema lifecycle deterministically.</p>
+
+            <h3>Migration Strategy with Flyway</h3>
+            <ul>
+                <li><strong>Version Control for DB:</strong> Every database change (DDL/DML) is stored in versioned SQL scripts (e.g., <code>V1__init_schema.sql</code>, <code>V2__add_otp_table.sql</code>) committed to Git.</li>
+                <li><strong>Environment Consistency:</strong> When the Spring Boot application starts, Flyway automatically checks its metadata table and applies pending migrations sequentially. This guarantees that Dev, Staging, and Production environments have perfectly synchronized schemas without manual DBA intervention.</li>
+            </ul>
+        </section>
+
+        <!-- Section 5: Frontend -->
+        <section class="article-section">
+            <h2>💻 Frontend Client Integration</h2>
+            <p>The client application is built with <span class="highlight">React</span> and <span class="highlight">TypeScript</span>, communicating securely with the backend API.</p>
+
+            <h3>Technical Implementations</h3>
+            <ul>
+                <li><strong>End-to-End Type Safety:</strong> Backend DTOs (Data Transfer Objects) are mirrored as TypeScript interfaces on the frontend. This prevents runtime errors related to missing or malformed data properties.</li>
+                <li><strong>Axios Interceptors:</strong> API calls are managed via Axios. We implemented request interceptors to automatically attach the JWT <code>Authorization: Bearer</code> header. Response interceptors are used to seamlessly handle <code>401 Unauthorized</code> errors by attempting a silent token refresh in the background before retrying the failed request.</li>
+            </ul>
+        </section>
+
+        <!-- Section 6: DevOps -->
+        <section class="article-section">
+            <h2>🐳 Containerization & DevOps</h2>
+            <p>To achieve reliable, repeatable deployments, the entire stack was containerized using <span class="highlight">Docker</span>.</p>
+
+            <h3>Deployment Architecture</h3>
+            <ul>
+                <li><strong>Multi-stage Dockerfiles:</strong> The backend uses a multi-stage Dockerfile. Stage 1 compiles the Java 21 code using Maven/Gradle. Stage 2 copies only the compiled <code>.jar</code> into a lightweight JRE base image (e.g., Alpine or Distroless), keeping the final image tiny and secure.</li>
+                <li><strong>Environment-Based Configuration:</strong> The Docker containers are stateless. Variables like database credentials, JWT secret keys, and SMTP server details are passed as environment variables at runtime, overriding Spring's <code>application.yml</code>.</li>
+                <li><strong>Secure API Routing:</strong> The Docker network isolates the database from the public internet. An API Gateway/Reverse Proxy (like Nginx) sits at the edge, terminating SSL/TLS, serving the React static files, and securely proxying <code>/api/*</code> requests directly to the Spring Boot container.</li>
+            </ul>
+        </section>
+
+    </div>
+
+</body>
+</html>

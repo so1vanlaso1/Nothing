@@ -1,0 +1,50 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: marketing-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-marketing_backend}
+      MYSQL_USER: ${HOST_NAME}
+      MYSQL_PASSWORD: ${HOST_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD:-root} || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: marketing-be
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      APP_NAME: ${APP_NAME}
+      SERVER_PORT: ${SERVER_PORT}
+      HOST_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-marketing_backend}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      HOST_NAME: ${HOST_NAME}
+      HOST_PASSWORD: ${HOST_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_EXPIRATION_TIME: ${JWT_EXPIRATION_TIME}
+      JWT_REFRESH_EXPIRATION_TIME: ${JWT_REFRESH_EXPIRATION_TIME}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_APP_PASSWORD: ${MAIL_APP_PASSWORD}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET}
+      FACEBOOK_TOKEN_ENCRYPTION: ${FACEBOOK_TOKEN_ENCRYPTION}
+
+volumes:
+  mysql_data:

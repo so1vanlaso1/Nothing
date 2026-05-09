@@ -1,0 +1,60 @@
+@host = http://localhost:8080
+
+### Login with default Spring Security
+POST {{host}}/login
+Content-Type: application/x-www-form-urlencoded
+
+username=marketing&password=marketing
+
+### Test Logout
+GET {{host}}/logout
+
+### Test GET status configuration
+GET {{host}}/v1/api/auth/status
+
+### Test GET CSRF token
+GET {{host}}/v1/api/auth/csrf-token
+
+### Test GET users
+GET {{host}}/v1/api/users
+
+### Test Add User
+POST {{host}}/v1/api/addUser
+Content-Type: application/json
+
+{
+  "email": "newuser@example.com",
+  "password": "password123"
+}
+
+### Test Auth Register
+POST {{host}}/v1/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "mySecurePassword"
+}
+
+### =============================================
+### Facebook Config Endpoints
+### =============================================
+
+### 1. Check Facebook Token Status
+GET {{host}}/v1/api/marketing/config/facebook/token/status
+
+### 2. Update/Save Facebook Token (replace YOUR_TOKEN and YOUR_PAGE_ID)
+PUT {{host}}/v1/api/marketing/config/facebook/token
+Content-Type: application/json
+
+{
+  "accessToken": "YOUR_ACCESS_TOKEN_HERE",
+  "pageId": "YOUR_PAGE_ID_HERE",
+  "exchangeForLongLived": true
+}
+
+### 3. Refresh Token (if expired)
+POST {{host}}/v1/api/marketing/config/facebook/token/refresh
+
+### 4. Get Connected Facebook Page Info
+GET {{host}}/v1/api/marketing/facebook/pages
